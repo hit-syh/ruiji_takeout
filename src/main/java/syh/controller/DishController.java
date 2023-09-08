@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +35,7 @@ public class DishController {
     private DishFlavorService dishFlavorService;
 
     @PostMapping()
+    @CacheEvict(value ={"Category_Dish","setmeal"} ,allEntries = true)
     public Result addDish(@RequestBody DishDto dishDto)
     {
         return dishService.addDish(dishDto);
@@ -55,6 +59,7 @@ public class DishController {
     }
     @PutMapping
     @Transactional
+    @CacheEvict(value ={"Category_Dish","setmeal"} ,allEntries = true)
     public Result update(@RequestBody DishDto dishDto)
     {
         Dish dish = new Dish();
@@ -76,6 +81,7 @@ public class DishController {
         return Result.success("修改成功");
     }
     @DeleteMapping
+    @CacheEvict(value ={"Category_Dish","setmeal"} ,allEntries = true)
     @Transactional
     public Result deleteByIds(@RequestParam  List<Long> ids) throws DeleteStatusException {
         for (Long id :ids)
@@ -87,6 +93,7 @@ public class DishController {
         dishService.removeByIds(ids);
         return Result.success("删除成功");
     }
+    @CacheEvict(value ={"Category_Dish","setmeal"} ,allEntries = true)
     @PostMapping("/status/{status}")
     public Result startOrStopByIds(@PathVariable Integer status,@RequestParam List<Long> ids)
     {
@@ -94,6 +101,7 @@ public class DishController {
         return Result.success("修改成功");
     }
     @GetMapping("/list")
+    @Cacheable(value = "Category_Dish",key = "#categoryId+'-'+#name+'-'+#status")
     public Result listByCategoryId(Long categoryId,String name,Integer status)
     {
         List<Dish> dishList = dishService.lambdaQuery().like(StringUtils.isNotBlank(name), Dish::getName, name).eq(categoryId != null, Dish::getCategoryId, categoryId).eq(status != null, Dish::getStatus, status).list();

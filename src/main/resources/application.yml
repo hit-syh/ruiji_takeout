@@ -7,6 +7,9 @@ spring:
   jackson:
     generator:
       write-numbers-as-strings: false
+  cache:
+    redis:
+      time-to-live: 1800000
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
